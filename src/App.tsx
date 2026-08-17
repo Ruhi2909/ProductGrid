@@ -26,7 +26,7 @@ function productToDraft(product: Product): DraftRecord {
     title: product.title,
     price: String(product.price),
     stock: String(product.stock),
-    rating: String(product.rating),
+    rating: String(Number(product.rating.toFixed(1))),
   };
 }
 
@@ -227,8 +227,8 @@ export default function App() {
       const product = products.find(p => p.id === productId);
       if (!state || !product) return;
 
-      // Re-validate everything before saving
-      const errors = validateDraft(state.draft);
+      // Re-validate modified fields before saving
+      const errors = validateDraft(state.draft, state.dirtyFields);
       if (!isRowValid(errors)) {
         setEditMap(prev => {
           const next = new Map(prev);
@@ -309,7 +309,7 @@ export default function App() {
   async function handleSaveAll() {
     if (isBulkSaving) return;
     const dirtyEntries = [...editMap.entries()].filter(
-      ([, state]) => state.dirtyFields.size > 0 && isRowValid(state.errors),
+      ([, state]) => state.dirtyFields.size > 0 && isRowValid(validateDraft(state.draft, state.dirtyFields)),
     );
     if (dirtyEntries.length === 0) return;
 

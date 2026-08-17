@@ -46,11 +46,21 @@ export function validateField(field: EditableField, value: string): string | und
   }
 }
 
-/** Validates all 4 editable fields in a draft row. */
-export function validateDraft(draft: DraftRecord): Partial<Record<EditableField, string>> {
+/** 
+ * Validates fields in a draft row.
+ * If `dirtyFields` is provided, ONLY fields that the user actually modified are validated.
+ * This prevents unedited server-side values (e.g. rating 4.99) from blocking saves of other fields.
+ */
+export function validateDraft(
+  draft: DraftRecord,
+  dirtyFields?: ReadonlySet<EditableField>
+): Partial<Record<EditableField, string>> {
   const errors: Partial<Record<EditableField, string>> = {};
-  const fields: EditableField[] = ['title', 'price', 'stock', 'rating'];
-  for (const field of fields) {
+  const fieldsToValidate: EditableField[] = dirtyFields && dirtyFields.size > 0
+    ? Array.from(dirtyFields)
+    : ['title', 'price', 'stock', 'rating'];
+
+  for (const field of fieldsToValidate) {
     const err = validateField(field, draft[field] ?? '');
     if (err) errors[field] = err;
   }
