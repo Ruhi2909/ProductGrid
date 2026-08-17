@@ -1,8 +1,11 @@
 import type { EditableField, DraftRecord } from './types';
 
 /**
- * Validate a single field value.
- * Returns an error message string, or undefined if valid.
+ * Validates a single field value against rules specified in requirements:
+ * - title: required, 3 to 100 chars, no leading or trailing whitespace
+ * - price: required, numeric, > 0, <= 999999, max 2 decimal places
+ * - stock: required, integer, 0 to 100000
+ * - rating: required, numeric, 0 to 5 inclusive, max 1 decimal place
  */
 export function validateField(field: EditableField, value: string): string | undefined {
   switch (field) {
@@ -43,7 +46,7 @@ export function validateField(field: EditableField, value: string): string | und
   }
 }
 
-/** Validate all editable fields in a draft, returns an errors object. */
+/** Validates all 4 editable fields in a draft row. */
 export function validateDraft(draft: DraftRecord): Partial<Record<EditableField, string>> {
   const errors: Partial<Record<EditableField, string>> = {};
   const fields: EditableField[] = ['title', 'price', 'stock', 'rating'];
@@ -54,7 +57,7 @@ export function validateDraft(draft: DraftRecord): Partial<Record<EditableField,
   return errors;
 }
 
-/** Returns true if there are no validation errors. */
+/** Checks if errors object has zero validation errors. */
 export function isRowValid(errors: Partial<Record<EditableField, string>>): boolean {
   return Object.keys(errors).length === 0;
 }
