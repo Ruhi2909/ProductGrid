@@ -366,16 +366,16 @@ export default function App() {
   const isSynced = inputQuery === committedParams.query;
 
   return (
-    <div className="app">
+    <div className="flex flex-col h-screen overflow-hidden bg-slate-950 text-slate-100 font-sans">
       {/* ── Header ── */}
-      <header className="app-header">
-        <div className="app-header-inner">
-          <div className="app-logo">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="22" height="22" aria-hidden="true">
+      <header className="shrink-0 bg-slate-900 border-b border-slate-800 px-4 pt-3 z-20">
+        <div className="flex flex-wrap items-center gap-4 mb-2.5">
+          <div className="flex items-center gap-2 text-blue-500 shrink-0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5.5 h-5.5">
               <rect x="3" y="3" width="18" height="18" rx="2" />
               <path d="M3 9h18M9 21V9" />
             </svg>
-            <span className="app-logo-text">ProductGrid</span>
+            <span className="font-semibold text-slate-100 text-sm tracking-tight">ProductGrid</span>
           </div>
 
           <SearchBox
@@ -399,8 +399,8 @@ export default function App() {
         />
       </header>
 
-      {/* ── Grid ── */}
-      <main className="app-main">
+      {/* ── Grid Main ── */}
+      <main className="flex-1 flex flex-col overflow-hidden relative">
         <Grid
           products={mergedProducts}
           total={total}
@@ -419,7 +419,7 @@ export default function App() {
         />
       </main>
 
-      {/* ── Save bar ── */}
+      {/* ── Save Bar ── */}
       <SaveBar
         dirtyCount={dirtyCount}
         isBulkSaving={isBulkSaving}
@@ -428,7 +428,7 @@ export default function App() {
         onDismissErrors={() => setBulkErrors([])}
       />
 
-      {/* ── Unsaved edits guard modal ── */}
+      {/* ── Unsaved Edits Modal ── */}
       {showGuard && (
         <UnsavedEditsModal
           dirtyCount={dirtyCount}

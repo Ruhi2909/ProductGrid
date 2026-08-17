@@ -25,7 +25,6 @@ const INPUT_TYPES: Record<EditableField, string> = {
   rating: 'number',
 };
 
-/** Cell that shows an inline input when not read-only, with live validation feedback. */
 export function EditableCell({
   id,
   field,
@@ -38,17 +37,23 @@ export function EditableCell({
 }: EditableCellProps) {
   if (readOnly) {
     return (
-      <div className="grid-cell grid-cell--readonly">
-        <span className="cell-value">{value}</span>
+      <div className="flex items-center px-2.5 min-w-0 border-r border-slate-800">
+        <span className="text-xs text-slate-300 truncate">{value}</span>
       </div>
     );
   }
 
   return (
-    <div className={`grid-cell grid-cell--editable${error ? ' grid-cell--error' : ''}${isDirty ? ' grid-cell--dirty' : ''}`}>
+    <div className="flex flex-col justify-center px-2 py-1 min-w-0 border-r border-slate-800 relative">
       <input
         id={id}
-        className="cell-input"
+        className={`w-full h-7 px-2 bg-slate-950 text-slate-100 text-xs rounded border transition-all outline-none ${
+          error
+            ? 'border-red-500 focus:ring-1 focus:ring-red-500'
+            : isDirty
+            ? 'border-amber-500/80 bg-amber-500/5 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'
+            : 'border-slate-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'
+        }`}
         type={INPUT_TYPES[field]}
         value={value}
         placeholder={PLACEHOLDERS[field]}
@@ -61,7 +66,7 @@ export function EditableCell({
         max={field === 'rating' ? '5' : undefined}
       />
       {error && (
-        <span id={`${id}-error`} className="cell-error" role="alert">
+        <span id={`${id}-error`} className="text-[10px] text-red-400 mt-0.5 truncate leading-none" role="alert">
           {error}
         </span>
       )}

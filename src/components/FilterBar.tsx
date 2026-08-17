@@ -38,13 +38,15 @@ export function FilterBar({
   }
 
   return (
-    <div className="filter-bar" role="toolbar" aria-label="Grid filters">
-      {/* Category filter */}
-      <div className="filter-group">
-        <label htmlFor="category-select" className="filter-label">Category</label>
+    <div className="flex flex-wrap items-center gap-3 pb-3" role="toolbar" aria-label="Grid filters">
+      {/* Category Filter */}
+      <div className="flex items-center gap-2">
+        <label htmlFor="category-select" className="text-xs font-medium text-slate-400 whitespace-nowrap">
+          Category
+        </label>
         <select
           id="category-select"
-          className="filter-select"
+          className="h-8 pl-2.5 pr-8 bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-md focus:border-blue-500 focus:outline-none disabled:opacity-50 cursor-pointer"
           value={category}
           onChange={handleCategoryChange}
           disabled={loadingCategories}
@@ -58,14 +60,16 @@ export function FilterBar({
         </select>
       </div>
 
-      <div className="filter-divider" aria-hidden="true" />
+      <div className="w-px h-5 bg-slate-800 hidden sm:block" />
 
-      {/* Sort column */}
-      <div className="filter-group">
-        <label htmlFor="sort-by-select" className="filter-label">Sort by</label>
+      {/* Sort Column */}
+      <div className="flex items-center gap-2">
+        <label htmlFor="sort-by-select" className="text-xs font-medium text-slate-400 whitespace-nowrap">
+          Sort by
+        </label>
         <select
           id="sort-by-select"
-          className="filter-select"
+          className="h-8 pl-2.5 pr-8 bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-md focus:border-blue-500 focus:outline-none cursor-pointer"
           value={sort.sortBy}
           onChange={handleSortByChange}
         >
@@ -75,23 +79,19 @@ export function FilterBar({
         </select>
       </div>
 
-      {/* Sort order toggle */}
+      {/* Order Toggle */}
       <button
         id="sort-order-btn"
-        className={`sort-order-btn${sort.order === 'desc' ? ' sort-order-btn--desc' : ''}`}
+        className={`flex items-center gap-1.5 h-8 px-3 text-xs rounded-md border font-medium transition-all cursor-pointer ${
+          sort.order === 'desc'
+            ? 'bg-blue-950/80 border-blue-600 text-blue-400'
+            : 'bg-slate-800 border-slate-700 text-slate-300 hover:border-blue-500 hover:text-blue-400'
+        }`}
         onClick={handleOrderToggle}
         type="button"
-        aria-label={`Sort order: ${sort.order === 'asc' ? 'ascending' : 'descending'}. Click to toggle.`}
-        title={sort.order === 'asc' ? 'Ascending — click for descending' : 'Descending — click for ascending'}
+        aria-label={`Sort order: ${sort.order}. Click to toggle.`}
       >
-        <svg viewBox="0 0 16 16" fill="currentColor" width="14" height="14" aria-hidden="true">
-          {sort.order === 'asc' ? (
-            <path d="M3.5 2.5a.5.5 0 0 0-1 0v8.793L1.146 9.94a.5.5 0 1 0-.707.707l2 2a.5.5 0 0 0 .707 0l2-2a.5.5 0 0 0-.707-.707L3.5 11.293V2.5zm4 1a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1H8a.5.5 0 0 1-.5-.5zM8 7.5a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1H8zm0 3a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1H8z" />
-          ) : (
-            <path d="M3.5 13.5a.5.5 0 0 1-1 0V4.707L1.146 6.06a.5.5 0 1 1-.707-.707l2-2a.5.5 0 0 1 .707 0l2 2a.5.5 0 1 1-.707.707L3.5 4.707V13.5zm4-11a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1H8a.5.5 0 0 1-.5-.5zM8 4.5a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1H8zm0 3a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1H8z" />
-          )}
-        </svg>
-        {sort.order === 'asc' ? 'Asc' : 'Desc'}
+        <span>{sort.order === 'asc' ? '↑ Asc' : '↓ Desc'}</span>
       </button>
     </div>
   );

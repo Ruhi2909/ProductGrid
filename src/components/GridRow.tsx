@@ -29,7 +29,6 @@ function GridRowInner({
   const hasErrors = editState ? !isRowValid(editState.errors) : false;
   const canSave = isDirty && !hasErrors && !isSaving;
 
-  // For each editable field, use draft value if editing, else product value
   function getValue(field: EditableField): string {
     if (editState) return editState.draft[field];
     return String(product[field]);
@@ -41,17 +40,19 @@ function GridRowInner({
 
   return (
     <div
-      className={`grid-row${isDirty ? ' grid-row--dirty' : ''}${isSaving ? ' grid-row--saving' : ''}${hasSaveError ? ' grid-row--error' : ''}`}
-      style={{ position: 'absolute', top, left: 0, right: 0, height: ROW_HEIGHT }}
+      className={`grid grid-cols-product min-w-[950px] border-b border-slate-800/80 transition-colors absolute left-0 right-0 ${
+        isDirty ? 'bg-amber-500/5 border-l-2 border-l-amber-500' : 'bg-slate-900 hover:bg-slate-850'
+      } ${isSaving ? 'opacity-60 pointer-events-none' : ''} ${hasSaveError ? 'border-l-2 border-l-red-500' : ''}`}
+      style={{ top, height: ROW_HEIGHT }}
       role="row"
       aria-label={`Product: ${product.title}`}
     >
       {/* ID */}
-      <div className="grid-cell grid-cell--id" role="gridcell">
-        <span className="cell-value cell-value--muted">#{product.id}</span>
+      <div className="flex items-center justify-center px-2 min-w-0 border-r border-slate-800" role="gridcell">
+        <span className="text-xs text-slate-500 font-mono">#{product.id}</span>
       </div>
 
-      {/* Title — editable */}
+      {/* Title */}
       <EditableCell
         id={`cell-title-${product.id}`}
         field="title"
@@ -62,17 +63,19 @@ function GridRowInner({
         onBlur={f => onCellBlur(product.id, f)}
       />
 
-      {/* Category — read-only */}
-      <div className="grid-cell grid-cell--readonly" role="gridcell">
-        <span className="cell-badge">{product.category}</span>
+      {/* Category */}
+      <div className="flex items-center px-2.5 min-w-0 border-r border-slate-800" role="gridcell">
+        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-800 border border-slate-700 text-slate-300 truncate max-w-[130px]">
+          {product.category}
+        </span>
       </div>
 
-      {/* Brand — read-only */}
-      <div className="grid-cell grid-cell--readonly" role="gridcell">
-        <span className="cell-value cell-value--muted">{product.brand ?? '—'}</span>
+      {/* Brand */}
+      <div className="flex items-center px-2.5 min-w-0 border-r border-slate-800" role="gridcell">
+        <span className="text-xs text-slate-400 truncate">{product.brand ?? '—'}</span>
       </div>
 
-      {/* Price — editable */}
+      {/* Price */}
       <EditableCell
         id={`cell-price-${product.id}`}
         field="price"
@@ -83,7 +86,7 @@ function GridRowInner({
         onBlur={f => onCellBlur(product.id, f)}
       />
 
-      {/* Stock — editable */}
+      {/* Stock */}
       <EditableCell
         id={`cell-stock-${product.id}`}
         field="stock"
@@ -94,7 +97,7 @@ function GridRowInner({
         onBlur={f => onCellBlur(product.id, f)}
       />
 
-      {/* Rating — editable */}
+      {/* Rating */}
       <EditableCell
         id={`cell-rating-${product.id}`}
         field="rating"
@@ -105,34 +108,33 @@ function GridRowInner({
         onBlur={f => onCellBlur(product.id, f)}
       />
 
-      {/* Row actions */}
-      <div className="grid-cell grid-cell--actions" role="gridcell">
+      {/* Actions */}
+      <div className="flex items-center gap-1.5 px-2.5 min-w-0" role="gridcell">
         {isDirty && (
           <>
             <button
               id={`save-row-${product.id}`}
-              className={`btn btn-save-row${canSave ? '' : ' btn--disabled'}`}
+              className={`flex items-center gap-1 px-2.5 h-7 rounded text-[11px] font-medium transition-colors border cursor-pointer ${
+                canSave
+                  ? 'bg-emerald-950/80 border-emerald-700 text-emerald-400 hover:bg-emerald-900/80'
+                  : 'opacity-45 cursor-not-allowed bg-slate-800 border-slate-700 text-slate-500'
+              }`}
               onClick={() => onSaveRow(product.id)}
               disabled={!canSave}
               type="button"
-              aria-label={`Save changes to ${product.title}`}
             >
               {isSaving ? (
-                <><span className="btn-spinner" aria-hidden="true" /> Saving…</>
+                <><span className="w-3 h-3 border-2 border-emerald-400/30 border-t-emerald-400 rounded-full animate-spin" /> Saving…</>
               ) : (
-                <>
-                  <svg viewBox="0 0 16 16" fill="currentColor" width="13" height="13" aria-hidden="true"><path d="M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4.5L10.5 1H2zm.5 1H10v3.5h4V14h-11V2zM9 2v3h3.5L9 2z"/></svg>
-                  Save row
-                </>
+                <>Save row</>
               )}
             </button>
             {!isSaving && (
               <button
                 id={`discard-row-${product.id}`}
-                className="btn btn-discard-row"
+                className="w-6 h-6 flex items-center justify-center rounded text-slate-400 hover:text-red-400 hover:bg-red-950/40 text-xs transition-colors cursor-pointer"
                 onClick={() => onDiscardRow(product.id)}
                 type="button"
-                aria-label={`Discard changes to ${product.title}`}
                 title="Discard changes"
               >
                 ✕
@@ -141,23 +143,18 @@ function GridRowInner({
           </>
         )}
         {hasSaveError && (
-          <span
-            className="row-save-error"
-            title={editState?.saveError}
-            role="alert"
-          >
+          <span className="text-[11px] text-red-400 font-medium truncate" title={editState?.saveError} role="alert">
             ⚠ Failed
           </span>
         )}
         {!isDirty && !hasSaveError && (
-          <span className="cell-value cell-value--muted row-pristine">—</span>
+          <span className="text-xs text-slate-600">—</span>
         )}
       </div>
     </div>
   );
 }
 
-// Memo prevents re-rendering rows that haven't changed
 export const GridRow = memo(GridRowInner, (prev, next) => {
   return (
     prev.product === next.product &&

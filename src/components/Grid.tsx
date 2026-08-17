@@ -1,7 +1,6 @@
 import type { Product, EditableField, EditMap, SortConfig } from '../types';
 import { GridRow } from './GridRow';
-import { useVirtualScroller } from '../hooks/useVirtualScroller';
-import { ROW_HEIGHT } from '../hooks/useVirtualScroller';
+import { useVirtualScroller, ROW_HEIGHT } from '../hooks/useVirtualScroller';
 
 interface GridProps {
   products: Product[];
@@ -24,27 +23,26 @@ const COLUMNS: {
   key: string;
   label: string;
   sortBy?: SortConfig['sortBy'];
-  className: string;
+  className?: string;
 }[] = [
-  { key: 'id',       label: '#',        className: 'col-id' },
-  { key: 'title',    label: 'Title',    sortBy: 'title',  className: 'col-title' },
-  { key: 'category', label: 'Category', className: 'col-category' },
-  { key: 'brand',    label: 'Brand',    className: 'col-brand' },
-  { key: 'price',    label: 'Price ($)', sortBy: 'price',  className: 'col-price' },
-  { key: 'stock',    label: 'Stock',    sortBy: 'stock',  className: 'col-stock' },
-  { key: 'rating',   label: 'Rating',   sortBy: 'rating', className: 'col-rating' },
-  { key: 'actions',  label: 'Actions',  className: 'col-actions' },
+  { key: 'id',       label: '#' },
+  { key: 'title',    label: 'Title',    sortBy: 'title' },
+  { key: 'category', label: 'Category' },
+  { key: 'brand',    label: 'Brand' },
+  { key: 'price',    label: 'Price ($)', sortBy: 'price' },
+  { key: 'stock',    label: 'Stock',    sortBy: 'stock' },
+  { key: 'rating',   label: 'Rating',   sortBy: 'rating' },
+  { key: 'actions',  label: 'Actions' },
 ];
 
-/** Skeleton rows shown during the initial page load */
 function SkeletonRows() {
   return (
     <>
       {Array.from({ length: 12 }, (_, i) => (
-        <div key={i} className="grid-row grid-row--skeleton" style={{ position: 'absolute', top: i * ROW_HEIGHT, left: 0, right: 0, height: ROW_HEIGHT }}>
+        <div key={i} className="grid grid-cols-product min-w-[950px] border-b border-slate-800/60 bg-slate-900 absolute left-0 right-0" style={{ top: i * ROW_HEIGHT, height: ROW_HEIGHT }}>
           {COLUMNS.map(col => (
-            <div key={col.key} className={`grid-cell ${col.className}`}>
-              <div className="skeleton-bar" style={{ width: col.key === 'title' ? '70%' : '60%' }} />
+            <div key={col.key} className="flex items-center px-3 border-r border-slate-800/60">
+              <div className="h-3 rounded bg-slate-800 animate-shimmer w-3/4" />
             </div>
           ))}
         </div>
@@ -83,74 +81,64 @@ export function Grid({
     }
   }
 
-  function sortIndicator(sortBy: SortConfig['sortBy'] | undefined) {
-    if (!sortBy || sort.sortBy !== sortBy) return <span className="sort-indicator sort-indicator--inactive">↕</span>;
-    return (
-      <span className="sort-indicator sort-indicator--active">
-        {sort.order === 'asc' ? '↑' : '↓'}
-      </span>
-    );
-  }
-
   return (
-    <div className="grid-wrapper" role="grid" aria-label="Products grid" aria-rowcount={total}>
-      {/* ── Sticky header ── */}
-      <div className="grid-header" role="row">
+    <div className="flex flex-col h-full overflow-x-auto overflow-y-hidden" role="grid" aria-label="Products grid" aria-rowcount={total}>
+      {/* Sticky Header */}
+      <div className="grid grid-cols-product min-w-[950px] bg-slate-950 border-b border-slate-800 sticky top-0 z-10 select-none" role="row">
         {COLUMNS.map(col => (
           <div
             key={col.key}
-            className={`grid-header-cell ${col.className}${col.sortBy ? ' grid-header-cell--sortable' : ''}`}
+            className={`flex items-center gap-1.5 px-3 h-10 text-xs font-semibold uppercase tracking-wider text-slate-400 border-r border-slate-800/80 ${
+              col.sortBy ? 'cursor-pointer hover:text-slate-100 hover:bg-slate-900 transition-colors' : ''
+            }`}
             role="columnheader"
-            aria-sort={
-              col.sortBy
-                ? sort.sortBy === col.sortBy
-                  ? sort.order === 'asc' ? 'ascending' : 'descending'
-                  : 'none'
-                : undefined
-            }
             onClick={() => handleHeaderSort(col.sortBy)}
             tabIndex={col.sortBy ? 0 : undefined}
             onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') handleHeaderSort(col.sortBy); }}
           >
-            {col.label}
-            {col.sortBy && sortIndicator(col.sortBy)}
+            <span>{col.label}</span>
+            {col.sortBy && (
+              <span className={`text-xs ${sort.sortBy === col.sortBy ? 'text-blue-400 font-bold' : 'text-slate-600'}`}>
+                {sort.sortBy === col.sortBy ? (sort.order === 'asc' ? '↑' : '↓') : '↕'}
+              </span>
+            )}
           </div>
         ))}
       </div>
 
-      {/* ── Scroll body ── */}
+      {/* Scrollable Virtual Body */}
       <div
         ref={containerRef}
-        className="grid-body"
+        className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin relative"
         onScroll={onScroll}
         role="presentation"
       >
-        {/* Full-page loading state */}
+        {/* Loading overlay */}
         {loading && (
-          <div className="grid-overlay" style={{ height: ROW_HEIGHT * 12, position: 'relative' }}>
+          <div className="relative" style={{ height: ROW_HEIGHT * 12 }}>
             <SkeletonRows />
           </div>
         )}
 
         {/* Error state */}
         {!loading && error && (
-          <div className="grid-empty">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="40" height="40" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            <p className="grid-empty-title">Failed to load products</p>
-            <p className="grid-empty-subtitle">{error}</p>
+          <div className="flex flex-col items-center justify-center gap-2 py-20 text-slate-400">
+            <span className="text-2xl">⚠</span>
+            <p className="text-sm font-medium text-slate-300">Failed to load products</p>
+            <p className="text-xs text-slate-500">{error}</p>
           </div>
         )}
 
-        {/* No-results state */}
+        {/* No Results state */}
         {!loading && !error && products.length === 0 && (
-          <div className="grid-empty">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="40" height="40" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-            <p className="grid-empty-title">No products found</p>
-            <p className="grid-empty-subtitle">Try a different search term or category</p>
+          <div className="flex flex-col items-center justify-center gap-2 py-20 text-slate-400">
+            <span className="text-2xl">🔍</span>
+            <p className="text-sm font-medium text-slate-300">No products found</p>
+            <p className="text-xs text-slate-500">Try a different search term or category</p>
           </div>
         )}
 
-        {/* Virtual rows */}
+        {/* Virtualized Rows */}
         {!loading && !error && products.length > 0 && (
           <div style={{ position: 'relative', height: totalHeight }} role="presentation">
             {virtualItems.map(item => {
@@ -172,16 +160,16 @@ export function Grid({
           </div>
         )}
 
-        {/* Load-more spinner */}
+        {/* Loading More Spinner */}
         {loadingMore && (
-          <div className="load-more-spinner" aria-label="Loading more products…">
-            <span className="btn-spinner btn-spinner--large" />
+          <div className="flex justify-center items-center py-4 bg-slate-900 border-t border-slate-800">
+            <span className="w-5 h-5 border-2 border-slate-700 border-t-blue-500 rounded-full animate-spin" />
           </div>
         )}
 
-        {/* End-of-list marker */}
+        {/* End Marker */}
         {!loading && !loadingMore && !hasMore && products.length > 0 && (
-          <div className="load-more-end">
+          <div className="text-center py-3 text-xs text-slate-500 border-t border-slate-800/60 bg-slate-950">
             All {total.toLocaleString()} products loaded
           </div>
         )}
